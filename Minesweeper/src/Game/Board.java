@@ -48,8 +48,8 @@ public class Board {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if (cells.get(i).get(j).isMine()) {
-                    incrementNeighbours(i, j); // Increase the mine count around the cells adjacent to the current cell
-                                               // (i, j).
+                    // Increase the mine count around the cells adjacent to the current cell (i, j).
+                    incrementNeighbours(i, j); 
                 }
             }
         }

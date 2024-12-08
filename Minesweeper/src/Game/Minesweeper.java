@@ -14,12 +14,21 @@ public class Minesweeper {
     private boolean firstClick;
     private UI ui;
 
+    private int tileSize;
+    private int boardWidth;
+    private int boardHeight;
+
+
     public Minesweeper(int rows, int cols, int mineCount) {
+        tileSize = 50;
+        this.boardWidth = cols * tileSize;
+        this.boardHeight = rows * tileSize;
+
         board = new Board(rows, cols, mineCount);
         buttons = new ArrayList<>();
         firstClick = false;
 
-        ui = new UI(this, rows, cols, mineCount); // Initialize UI
+        ui = new UI(this, rows, cols, mineCount, tileSize); // Initialize UI
         startTimer();
     }
 
@@ -29,7 +38,7 @@ public class Minesweeper {
             ArrayList<JButton> buttonRow = new ArrayList<>();
             for (int col = 0; col < board.getCols(); col++) {
                 JButton button = new JButton();
-                button.setPreferredSize(new Dimension(50, 50));
+                button.setPreferredSize(new Dimension(tileSize, tileSize));
 
                 final int currentRow = row;
                 final int currentCol = col;
@@ -71,11 +80,10 @@ public class Minesweeper {
 
         cell.toggleFlag();
         if (cell.isFlagged()) {
-            buttons.get(row).get(col).setText("F");
+            buttons.get(row).get(col).setIcon(ui.getFlagIcon());
         } else {
-            buttons.get(row).get(col).setText("");
+            buttons.get(row).get(col).setIcon(null);
         }
-        // ui.updateMineCounter(); // Update the mine counter whenever a flag is toggled
     }
 
     public void startTimer() {
@@ -140,11 +148,11 @@ public class Minesweeper {
             return;
         }
 
-        StateManager.getInstance().addAction(new RevealAction(cell, buttons.get(row).get(col)));
+        StateManager.getInstance().addAction(new RevealAction(cell, buttons.get(row).get(col), ui));
 
         if (cell.isFlagged()) {
             cell.toggleFlag();
-            buttons.get(row).get(col).setText("");
+            buttons.get(row).get(col).setIcon(ui.getEmptyCellIcon());
             ui.updateMineCounter(); // Update the mine counter whenever a flag is removed
         }
 
@@ -190,5 +198,13 @@ public class Minesweeper {
 
     public Board getBoard() {
         return board;
+    }
+
+    public int getCols() {
+        return board.getCols();
+    }
+
+    public int getRows() {
+        return board.getRows();
     }
 }

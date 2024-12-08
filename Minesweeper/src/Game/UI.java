@@ -14,9 +14,13 @@ public class UI extends JFrame {
     private JPanel buttonPanel;
     private JPanel gridPanel;
     private ImageIcon mineIcon;
+    private ImageIcon flagIcon;
+    private ImageIcon emptyCellIcon;
+    private int tileSize;
 
-    public UI(Minesweeper game, int rows, int cols, int mineCount) {
+    public UI(Minesweeper game, int rows, int cols, int mineCount, int tileSize) {
         this.game = game;
+        this.tileSize = tileSize;
         initializeUI(rows, cols, mineCount);
         configureFrame();
     }
@@ -28,7 +32,7 @@ public class UI extends JFrame {
         createTimerPanel();
         createButtonPanel();
         createGridPanel(rows, cols);
-
+        loadIcons();
         // Add all panels to the frame
         addComponentsToFrame();
     }
@@ -76,9 +80,20 @@ public class UI extends JFrame {
         game.initButtons(gridPanel);
     }
 
-    // Method to load the mine icon
-    private void loadMineIcon() {
-        mineIcon = new ImageIcon(getClass().getResource("/Image/mine.jpg"));
+    // Method to load the icons
+
+    private void loadIcons() {
+        ImageIcon originalMineIcon = new ImageIcon(getClass().getResource("/Image/bomb.png")); // Load the mine image
+        Image scaledMineImage = originalMineIcon.getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH); // Resize
+        mineIcon = new ImageIcon(scaledMineImage); // Create an ImageIcon from the resized image
+
+        ImageIcon originalFlagIcon = new ImageIcon(getClass().getResource("/Image/flag.png")); 
+        Image scaledFlagImage = originalFlagIcon.getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH); 
+        flagIcon = new ImageIcon(scaledFlagImage); 
+
+        ImageIcon originalEmptyCellIcon = new ImageIcon(getClass().getResource("/Image/empty.png"));
+        Image scaledEmptyCellImage = originalEmptyCellIcon.getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH); 
+        emptyCellIcon = new ImageIcon(scaledEmptyCellImage); 
     }
 
     // Method to add all the components to the frame
@@ -97,7 +112,7 @@ public class UI extends JFrame {
     private void configureFrame() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setTitle("Minesweeper");
-        setSize(600, 600);
+        setSize(tileSize * game.getCols(), tileSize * game.getRows());
         setLocationRelativeTo(null);
         pack();
         setVisible(true);
@@ -128,5 +143,13 @@ public class UI extends JFrame {
 
     public ImageIcon getMineIcon() {
         return mineIcon;
+    }
+
+    public ImageIcon getFlagIcon() {
+        return flagIcon;
+    }
+
+    public ImageIcon getEmptyCellIcon() {
+        return emptyCellIcon;
     }
 }
