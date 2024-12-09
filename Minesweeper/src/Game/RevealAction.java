@@ -6,13 +6,11 @@ public class RevealAction extends Action {
     private Cell cell;
     private JButton button;
     private boolean isFlagged;
-    private UI ui;
     
-    public RevealAction(Cell cell, JButton button, UI ui) {
+    public RevealAction(Cell cell, JButton button) {
         this.cell = cell;
         isFlagged = cell.isFlagged();
         this.button = button;
-        this.ui = ui;
     }
 
     public void doAction() {
@@ -29,9 +27,11 @@ public class RevealAction extends Action {
     public void undo() {
         cell.setRevealed(false);
         button.setEnabled(true); 
-        button.setIcon(ui.getEmptyCellIcon());
+        // button.setText("");
+        button.setIcon(UI.getInstance().getEmptyCellIcon());
+        
         if (isFlagged) {
-            button.setIcon(ui.getFlagIcon());
+            button.setIcon(UI.getInstance().getFlagIcon());
             if (!cell.isFlagged()) {
                 cell.toggleFlag();
             }

@@ -28,7 +28,8 @@ public class Minesweeper {
         buttons = new ArrayList<>();
         firstClick = false;
 
-        ui = new UI(this, rows, cols, mineCount, tileSize); // Initialize UI
+        UI.getInstance().setVariables(this, rows, cols, mineCount, tileSize);
+        ui = UI.getInstance();
         startTimer();
     }
 
@@ -39,6 +40,8 @@ public class Minesweeper {
             for (int col = 0; col < board.getCols(); col++) {
                 JButton button = new JButton();
                 button.setPreferredSize(new Dimension(tileSize, tileSize));
+                button.setBackground(Color.WHITE);
+                button.setIcon(UI.getInstance().getEmptyCellIcon());
 
                 final int currentRow = row;
                 final int currentCol = col;
@@ -82,7 +85,7 @@ public class Minesweeper {
         if (cell.isFlagged()) {
             buttons.get(row).get(col).setIcon(ui.getFlagIcon());
         } else {
-            buttons.get(row).get(col).setIcon(null);
+            buttons.get(row).get(col).setIcon(ui.getEmptyCellIcon());
         }
     }
 
@@ -99,18 +102,7 @@ public class Minesweeper {
 
     private void handleCellClick(int row, int col) {
         Cell cell = board.getCell(row, col);
-        if (cell.isMine()) {
-            timer.stop();
-            JOptionPane.showMessageDialog(ui.getFrame(), "Game Over!");
-            revealAllMines();
-            for (int i = 0; i < board.getRows(); i++) {
-                for (int j = 0; j < board.getCols(); j++) {
-                    if (!board.getCell(i, j).isMine()) {
-                        revealCell(i, j);
-                    }
-                }
-            }
-        } else if (!cell.isRevealed()) {
+        if (!cell.isRevealed()) {
             revealCell(row, col);
         } else {
             int countFlags = 0;
@@ -142,13 +134,62 @@ public class Minesweeper {
         }
     }
 
+    public void setButtonNumbers(int row, int col) {
+        int mines = board.getCell(row, col).getNeighbouringMines();
+        switch (mines) {
+            case 1:
+                buttons.get(row).get(col).setIcon(ui.getOneIcon());
+                break;
+            case 2:
+                buttons.get(row).get(col).setIcon(ui.getTwoIcon());
+                break;
+            case 3:
+                buttons.get(row).get(col).setIcon(ui.getThreeIcon());
+                break;
+            case 4:
+                buttons.get(row).get(col).setIcon(ui.getFourIcon());
+                break;
+            case 5:
+                buttons.get(row).get(col).setIcon(ui.getFiveIcon());
+                break;
+            case 6:
+                buttons.get(row).get(col).setIcon(ui.getSixIcon());
+                break;
+            case 7:
+                buttons.get(row).get(col).setIcon(ui.getSevenIcon());
+                break;
+            case 8:
+                buttons.get(row).get(col).setIcon(ui.getEightIcon());
+                break;
+            default:   
+                break;
+        }
+    }
+
     private void revealCell(int row, int col) {
         Cell cell = board.getCell(row, col);
         if (cell.isRevealed()) { // Ignore if cell is already revealed
             return;
         }
 
-        StateManager.getInstance().addAction(new RevealAction(cell, buttons.get(row).get(col), ui));
+        if (cell.isMine()) {
+            timer.stop();
+            buttons.get(row).get(col).setBackground(Color.RED);
+            ui.disableUndoButton(); // no UNDO if game over
+            JOptionPane.showMessageDialog(ui.getFrame(), "Game Over!");
+
+            for (int i = 0; i < board.getRows(); i++) {
+                for (int j = 0; j < board.getCols(); j++) {
+                    if (!board.getCell(i, j).isMine()) {
+                        revealCell(i, j);
+                    }
+                }
+            }
+            revealAllMines();
+            return;
+        }
+
+        StateManager.getInstance().addAction(new RevealAction(cell, buttons.get(row).get(col)));
 
         if (cell.isFlagged()) {
             cell.toggleFlag();
@@ -157,10 +198,10 @@ public class Minesweeper {
         }
 
         cell.setRevealed(); // set current cell as revealed
-        buttons.get(row).get(col).setEnabled(false); // disable the button (ô đó mở rồi nên vô hiệu hóa cái button đó)
+        // buttons.get(row).get(col).setEnabled(false); // disable the button (ô đó mở rồi nên vô hiệu hóa cái button đó)
         if (cell.getNeighbouringMines() > 0) { // If there are neighboring mines
             // display the number of neighboring mines on the button
-            buttons.get(row).get(col).setText(String.valueOf(cell.getNeighbouringMines()));
+            setButtonNumbers(row, col);
         } else {
             // If there are no neighboring mines, recursively reveal surrounding cells
             DFS(row, col);
@@ -190,6 +231,7 @@ public class Minesweeper {
             for (int col = 0; col < board.getCols(); col++) {
                 Cell cell = board.getCell(row, col);
                 if (cell.isMine()) {
+                    cell.setRevealed();
                     buttons.get(row).get(col).setIcon(ui.getMineIcon());
                 }
             }

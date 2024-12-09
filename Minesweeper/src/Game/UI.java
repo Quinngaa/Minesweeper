@@ -1,11 +1,13 @@
 package Game;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.*;
-import java.awt.event.MouseEvent;
+import java.net.URL;
 
 public class UI extends JFrame {
+    private static UI instance;
     private Minesweeper game;
     private JLabel mineCounterLabel;
     private JLabel timerLabel;
@@ -16,9 +18,25 @@ public class UI extends JFrame {
     private ImageIcon mineIcon;
     private ImageIcon flagIcon;
     private ImageIcon emptyCellIcon;
+    private ImageIcon oneIcon;
+    private ImageIcon twoIcon;
+    private ImageIcon threeIcon;
+    private ImageIcon fourIcon;
+    private ImageIcon fiveIcon;
+    private ImageIcon sixIcon;
+    private ImageIcon sevenIcon;
+    private ImageIcon eightIcon;
+    private ImageIcon flatIcon;
     private int tileSize;
 
-    public UI(Minesweeper game, int rows, int cols, int mineCount, int tileSize) {
+    public static UI getInstance() {
+        if (instance == null) {
+            instance = new UI();
+        }
+        return instance;
+    }
+
+    public void setVariables(Minesweeper game, int rows, int cols, int mineCount, int tileSize) {
         this.game = game;
         this.tileSize = tileSize;
         initializeUI(rows, cols, mineCount);
@@ -31,8 +49,9 @@ public class UI extends JFrame {
         createMineCounterPanel(mineCount);
         createTimerPanel();
         createButtonPanel();
-        createGridPanel(rows, cols);
         loadIcons();
+        createGridPanel(rows, cols);
+
         // Add all panels to the frame
         addComponentsToFrame();
     }
@@ -62,16 +81,17 @@ public class UI extends JFrame {
         buttonPanel = new JPanel();
         buttonPanel.setBackground(Color.BLACK);
         JButton undoButton = new JButton("UNDO");
-        undoButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (SwingUtilities.isLeftMouseButton(e)) {
-                    StateManager.getInstance().undo();
-                    updateMineCounter();
-                }
-            }
-        });
+        undoButton.addActionListener(new ActionListener() { 
+            public void actionPerformed(ActionEvent e) { 
+                StateManager.getInstance().undoState();
+                updateMineCounter();
+            } 
+          } );
         buttonPanel.add(undoButton);
+    }
+
+    public void disableUndoButton() {
+        buttonPanel.getComponent(0).setEnabled(false);
     }
 
     // Method to create and configure the grid panel
@@ -81,19 +101,30 @@ public class UI extends JFrame {
     }
 
     // Method to load the icons
-
     private void loadIcons() {
-        ImageIcon originalMineIcon = new ImageIcon(getClass().getResource("/Image/bomb.png")); // Load the mine image
-        Image scaledMineImage = originalMineIcon.getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH); // Resize
-        mineIcon = new ImageIcon(scaledMineImage); // Create an ImageIcon from the resized image
+        mineIcon = loadAndScaleIcon("/Image/bomb.png");
+        flagIcon = loadAndScaleIcon("/Image/flag.png");
+        emptyCellIcon = loadAndScaleIcon("/Image/empty.png");
+        oneIcon = loadAndScaleIcon("/Image/one.png");
+        twoIcon = loadAndScaleIcon("/Image/two.png");
+        threeIcon = loadAndScaleIcon("/Image/three.png");
+        fourIcon = loadAndScaleIcon("/Image/four.png");
+        fiveIcon = loadAndScaleIcon("/Image/five.png");
+        sixIcon = loadAndScaleIcon("/Image/six.png");
+        sevenIcon = loadAndScaleIcon("/Image/seven.png");
+        eightIcon = loadAndScaleIcon("/Image/eight.png");
+        flatIcon = loadAndScaleIcon("/Image/flat.png");
+    }
 
-        ImageIcon originalFlagIcon = new ImageIcon(getClass().getResource("/Image/flag.png")); 
-        Image scaledFlagImage = originalFlagIcon.getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH); 
-        flagIcon = new ImageIcon(scaledFlagImage); 
-
-        ImageIcon originalEmptyCellIcon = new ImageIcon(getClass().getResource("/Image/empty.png"));
-        Image scaledEmptyCellImage = originalEmptyCellIcon.getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH); 
-        emptyCellIcon = new ImageIcon(scaledEmptyCellImage); 
+    private ImageIcon loadAndScaleIcon(String path) {
+        URL resource = getClass().getResource(path);
+        if (resource == null) {
+        System.err.println("Error: Unable to load icon from path: " + path);
+        return null;
+        }
+        ImageIcon originalIcon = new ImageIcon(getClass().getResource(path));
+        Image scaledImage = originalIcon.getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaledImage);
     }
 
     // Method to add all the components to the frame
@@ -151,5 +182,41 @@ public class UI extends JFrame {
 
     public ImageIcon getEmptyCellIcon() {
         return emptyCellIcon;
+    }
+
+    public ImageIcon getOneIcon() {
+        return oneIcon;
+    }
+
+    public ImageIcon getTwoIcon() {
+        return twoIcon;
+    }
+
+    public ImageIcon getThreeIcon() {
+        return threeIcon;
+    }
+
+    public ImageIcon getFourIcon() {
+        return fourIcon;
+    }
+
+    public ImageIcon getFiveIcon() {
+        return fiveIcon;
+    }
+
+    public ImageIcon getSixIcon() {
+        return sixIcon;
+    }
+
+    public ImageIcon getSevenIcon() {
+        return sevenIcon;
+    }
+
+    public ImageIcon getEightIcon() {
+        return eightIcon;
+    }
+
+    public ImageIcon getFlatIcon() {
+        return flatIcon;
     }
 }
