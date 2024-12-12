@@ -15,9 +15,11 @@ public class RevealAction extends Action {
 
     public void doAction() {
         cell.setRevealed();
-        button.setEnabled(false); 
+        button.setEnabled(true); 
         if (cell.getNeighbouringMines() > 0) { 
-            button.setText(String.valueOf(cell.getNeighbouringMines())); 
+            UI.getInstance().setButtonNumbers(button, cell.getNeighbouringMines());
+        } else {
+            button.setEnabled(false);
         }
         if (isFlagged) {
             cell.toggleFlag();
@@ -27,9 +29,11 @@ public class RevealAction extends Action {
     public void undo() {
         cell.setRevealed(false);
         button.setEnabled(true); 
-        button.setText("");
+        button.setIcon(UI.getInstance().getEmptyCellIcon());
+        System.out.println("UNDO");
+        
         if (isFlagged) {
-            button.setText("F");
+            button.setIcon(UI.getInstance().getFlagIcon());
             if (!cell.isFlagged()) {
                 cell.toggleFlag();
             }

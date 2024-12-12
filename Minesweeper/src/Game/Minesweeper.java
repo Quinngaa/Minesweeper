@@ -3,6 +3,7 @@ package Game;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+
 import javax.swing.*;
 import javax.swing.Timer;
 
@@ -12,24 +13,36 @@ public class Minesweeper {
     private Timer timer;
     private int secondsPassed; // time passed since the game started
     private boolean firstClick;
-    private UI ui;
+    private boolean gameEnded;
+
+    private int tileSize;
+    private int boardWidth;
+    private int boardHeight;
 
     public Minesweeper(int rows, int cols, int mineCount) {
+        tileSize = 50;
+        this.boardWidth = cols * tileSize;
+        this.boardHeight = rows * tileSize;
+
         board = new Board(rows, cols, mineCount);
         buttons = new ArrayList<>();
         firstClick = false;
+        gameEnded = false;
 
-        ui = new UI(this, rows, cols, mineCount); // Initialize UI
+        UI.getInstance().setVariables(this, rows, cols, mineCount, tileSize);
         startTimer();
     }
 
     // Method to initialize the buttons for each cell on the board
     public void initButtons(JPanel gridPanel) {
+        buttons.clear();
         for (int row = 0; row < board.getRows(); row++) {
             ArrayList<JButton> buttonRow = new ArrayList<>();
             for (int col = 0; col < board.getCols(); col++) {
                 JButton button = new JButton();
-                button.setPreferredSize(new Dimension(50, 50));
+                button.setPreferredSize(new Dimension(tileSize, tileSize));
+                button.setBackground(Color.LIGHT_GRAY);
+                button.setIcon(UI.getInstance().getEmptyCellIcon());
 
                 final int currentRow = row;
                 final int currentCol = col;
@@ -39,17 +52,20 @@ public class Minesweeper {
                     @Override
                     public void mousePressed(MouseEvent e) {
                         if (SwingUtilities.isRightMouseButton(e)) {
-                            StateManager.getInstance().undoState();
+                            StateManager.getInstance().newState();
                             toggleFlag(currentRow, currentCol);
-                            ui.updateMineCounter(); // Update the mine counter whenever a flag is toggled
+                            StateManager.getInstance().doAction();
+                            UI.getInstance().updateMineCounter(); // Update the mine counter whenever a flag is toggled
                         } else if (SwingUtilities.isLeftMouseButton(e)) {
-                            StateManager.getInstance().undoState();
+                            StateManager.getInstance().newState();
                             if (!firstClick) {
+                                System.out.println("Placing mines...");
                                 board.placeMines(currentRow, currentCol);
                                 firstClick = true;
                             }
                             handleCellClick(currentRow, currentCol);
-                            ui.updateMineCounter(); // Update the mine counter whenever a flag is toggled
+                            StateManager.getInstance().doAction();
+                            UI.getInstance().updateMineCounter(); // Update the mine counter whenever a flag is toggled
                         }
                     }
                 });
@@ -66,16 +82,7 @@ public class Minesweeper {
         if (cell.isRevealed()) {
             return; // cannot flag a revealed cell
         }
-
         StateManager.getInstance().addAction(new ToggleFlagAction(buttons.get(row).get(col), cell));
-
-        cell.toggleFlag();
-        if (cell.isFlagged()) {
-            buttons.get(row).get(col).setText("F");
-        } else {
-            buttons.get(row).get(col).setText("");
-        }
-        // ui.updateMineCounter(); // Update the mine counter whenever a flag is toggled
     }
 
     public void startTimer() {
@@ -83,7 +90,7 @@ public class Minesweeper {
             @Override
             public void actionPerformed(ActionEvent evt) {
                 secondsPassed++;
-                ui.updateTimer(secondsPassed);
+                UI.getInstance().updateTimer(secondsPassed);
             }
         });
         timer.start();
@@ -91,18 +98,7 @@ public class Minesweeper {
 
     private void handleCellClick(int row, int col) {
         Cell cell = board.getCell(row, col);
-        if (cell.isMine()) {
-            timer.stop();
-            JOptionPane.showMessageDialog(ui.getFrame(), "Game Over!");
-            revealAllMines();
-            for (int i = 0; i < board.getRows(); i++) {
-                for (int j = 0; j < board.getCols(); j++) {
-                    if (!board.getCell(i, j).isMine()) {
-                        revealCell(i, j);
-                    }
-                }
-            }
-        } else if (!cell.isRevealed()) {
+        if (!cell.isRevealed()) {
             revealCell(row, col);
         } else {
             int countFlags = 0;
@@ -140,22 +136,45 @@ public class Minesweeper {
             return;
         }
 
+        if (cell.isMine()) {
+            gameEnded = true;
+            timer.stop();
+            UI.getInstance().disableUndoButton(); // no UNDO if game over
+
+            for (int i = 0; i < board.getRows(); i++) {
+                for (int j = 0; j < board.getCols(); j++) {
+                    if (!board.getCell(i, j).isMine()) {
+                        revealCell(i, j);
+                    }
+                }
+            }
+            revealAllMines();
+            UI.getInstance().showGameOverDialog();
+            return;
+        }
+
         StateManager.getInstance().addAction(new RevealAction(cell, buttons.get(row).get(col)));
 
         if (cell.isFlagged()) {
             cell.toggleFlag();
-            buttons.get(row).get(col).setText("");
-            ui.updateMineCounter(); // Update the mine counter whenever a flag is removed
+            buttons.get(row).get(col).setIcon(UI.getInstance().getEmptyCellIcon());
+            UI.getInstance().updateMineCounter(); // Update the mine counter whenever a flag is removed
         }
 
         cell.setRevealed(); // set current cell as revealed
-        buttons.get(row).get(col).setEnabled(false); // disable the button (ô đó mở rồi nên vô hiệu hóa cái button đó)
-        if (cell.getNeighbouringMines() > 0) { // If there are neighboring mines
-            // display the number of neighboring mines on the button
-            buttons.get(row).get(col).setText(String.valueOf(cell.getNeighbouringMines()));
-        } else {
+        buttons.get(row).get(col).setEnabled(false); // disable the button
+        
+
+        // cell.setRevealed(); // set current cell as revealed
+
+        if (cell.getNeighbouringMines() == 0) {
             // If there are no neighboring mines, recursively reveal surrounding cells
             DFS(row, col);
+        }
+
+        if (!gameEnded && checkWin()) {
+            timer.stop();
+            UI.getInstance().showGameWinDialog();
         }
     }
 
@@ -182,13 +201,47 @@ public class Minesweeper {
             for (int col = 0; col < board.getCols(); col++) {
                 Cell cell = board.getCell(row, col);
                 if (cell.isMine()) {
-                    buttons.get(row).get(col).setIcon(ui.getMineIcon());
+                    cell.setRevealed();
+                    buttons.get(row).get(col).setIcon(UI.getInstance().getMineIcon());
                 }
             }
         }
     }
 
+    public void restartGame() {
+        secondsPassed = 0;
+        firstClick = false;
+        gameEnded = false;
+
+        board.resetBoard();
+        UI.getInstance().resetUI();
+        StateManager.getInstance().clearStates();
+
+        UI.getInstance().enableUndoButton();
+        timer.start();
+    }
+
+    public boolean checkWin() {
+        for (int row = 0; row < board.getRows(); row++) {
+            for (int col = 0; col < board.getCols(); col++) {
+                Cell cell = board.getCell(row, col);
+                if (!cell.isRevealed() && !cell.isMine()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public Board getBoard() {
         return board;
+    }
+
+    public int getCols() {
+        return board.getCols();
+    }
+
+    public int getRows() {
+        return board.getRows();
     }
 }

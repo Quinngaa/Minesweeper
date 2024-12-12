@@ -14,9 +14,9 @@ public class ToggleFlagAction extends Action {
     public void doAction() {
         cell.toggleFlag();
         if (cell.isFlagged()) {
-            button.setText("F");
+            button.setIcon(UI.getInstance().getFlagIcon());
         } else {
-            button.setText("");
+            button.setIcon(UI.getInstance().getEmptyCellIcon());
         }
     }
 
