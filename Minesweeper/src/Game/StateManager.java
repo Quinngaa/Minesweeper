@@ -20,7 +20,7 @@ public class StateManager {
         return instance;
     }
 
-    public void undoState() { 
+    public void newState() { 
         states.push(new ArrayList<Action>());
     }
 
@@ -29,6 +29,9 @@ public class StateManager {
     }
 
     public void undo() {
+        while (!states.isEmpty() && states.peek().isEmpty()) {
+            states.pop();
+        }
         if (!states.isEmpty()) {
             ArrayList<Action> actions = states.pop();
             for (int i = actions.size() - 1; i >= 0; i--) {
@@ -37,16 +40,20 @@ public class StateManager {
         }
     }
 
-    public void setGameOver(boolean gameOver) {
-        this.gameOver = gameOver;
+    public void doAction() {
+        if (gameOver) {
+            return;
+        }
+        if (states.isEmpty()) {
+            return;
+        }
+        ArrayList<Action> actions = states.peek();
+        for (Action action : actions) {
+            action.doAction();
+        }
     }
 
-    public boolean isGameOver() {
-        return gameOver;
-    }
-
-    public void reset() {
+    public void clearStates() {
         states.clear();
-        gameOver = false;
     }
 }

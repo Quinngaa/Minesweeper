@@ -26,7 +26,6 @@ public class UI extends JFrame {
     private ImageIcon sixIcon;
     private ImageIcon sevenIcon;
     private ImageIcon eightIcon;
-    private ImageIcon flatIcon;
     private int tileSize;
 
     public static UI getInstance() {
@@ -55,14 +54,15 @@ public class UI extends JFrame {
         // Add all panels to the frame
         addComponentsToFrame();
     }
-
+    
     // Method to create and configure the mine counter panel
     private void createMineCounterPanel(int mineCount) {
         minesLeftPanel = new JPanel();
         minesLeftPanel.setBackground(Color.BLACK);
         mineCounterLabel = new JLabel("Mines Left: " + mineCount);
-        mineCounterLabel.setFont(new Font("Arial", Font.BOLD, 15));
+        mineCounterLabel.setFont(new Font("Arial", Font.BOLD, 18));
         mineCounterLabel.setForeground(Color.RED);
+        mineCounterLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         minesLeftPanel.add(mineCounterLabel);
     }
 
@@ -71,8 +71,9 @@ public class UI extends JFrame {
         timerPanel = new JPanel();
         timerPanel.setBackground(Color.BLACK);
         timerLabel = new JLabel("Time: 0");
-        timerLabel.setFont(new Font("Arial", Font.BOLD, 15));
+        timerLabel.setFont(new Font("Arial", Font.BOLD, 18));
         timerLabel.setForeground(Color.RED);
+        timerLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         timerPanel.add(timerLabel);
     }
 
@@ -80,20 +81,158 @@ public class UI extends JFrame {
     private void createButtonPanel() {
         buttonPanel = new JPanel();
         buttonPanel.setBackground(Color.BLACK);
-        JButton undoButton = new JButton("UNDO");
-        undoButton.addActionListener(new ActionListener() { 
-            public void actionPerformed(ActionEvent e) { 
-                StateManager.getInstance().undoState();
-                updateMineCounter();
-            } 
-          } );
+
+        JButton undoButton = createUndoButton();
+        JButton newGameButton = createNewGameButton();
+
         buttonPanel.add(undoButton);
+        buttonPanel.add(newGameButton);
+    }
+
+    private JButton createUndoButton() {
+        JButton undoButton = new JButton("UNDO");
+        undoButton.setFont(new Font("Arial", Font.BOLD, 17));
+        undoButton.setForeground(Color.RED); // Set text color to red
+        undoButton.setBackground(Color.BLACK); // Set button background to black
+        undoButton.setBorder(BorderFactory.createLineBorder(Color.RED)); // Set border color to red
+        undoButton.setFocusPainted(false); // Disable focus painting
+
+        // Adjust the size of the button to fit the text
+        undoButton.setPreferredSize(
+                new Dimension(undoButton.getPreferredSize().width + 10, undoButton.getPreferredSize().height + 5));
+        undoButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                StateManager.getInstance().undo();
+                updateMineCounter();
+            }
+        });
+
+        return undoButton;
+    }
+
+    private JButton createNewGameButton() {
+        JButton newGameButton = new JButton("NEW GAME");
+        newGameButton.setFont(new Font("Arial", Font.BOLD, 17));
+        newGameButton.setForeground(Color.RED); // Set text color to red
+        newGameButton.setBackground(Color.BLACK); // Set button background to black
+        newGameButton.setBorder(BorderFactory.createLineBorder(Color.RED)); // Set border color to red
+        newGameButton.setFocusPainted(false); // Disable focus painting
+
+        // Adjust the size of the button to fit the text
+        newGameButton.setPreferredSize(
+                new Dimension(newGameButton.getPreferredSize().width + 10,
+                        newGameButton.getPreferredSize().height + 5));
+        newGameButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                game.restartGame();
+            }
+        });
+        return newGameButton;
+    }
+
+    public void showGameWinDialog() {
+        JLabel messageLabel = new JLabel("Congratulations! You won!");
+        messageLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        messageLabel.setForeground(Color.GREEN);
+        messageLabel.setHorizontalAlignment(JLabel.CENTER);
+        messageLabel.setOpaque(true); // Make the label opaque to show background color
+
+        // Create a custom dialog
+        JDialog dialog = new JDialog((Frame) null, "Game Won", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.add(messageLabel, BorderLayout.CENTER);
+
+        // Create a custom "OK" button
+        JButton okButton = new JButton("OK");
+        okButton.setFont(new Font("Arial", Font.BOLD, 16));
+        okButton.setFocusPainted(false);
+        okButton.addActionListener(e -> dialog.dispose());
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(Color.WHITE); // Set background color to white
+        buttonPanel.add(okButton);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.setSize(350, 100);
+        dialog.setLocationRelativeTo(null);
+        dialog.setUndecorated(true); // Remove the window decorations
+        dialog.getRootPane().setBorder(BorderFactory.createLineBorder(Color.GREEN, 2)); // Add a custom border
+        dialog.setVisible(true);
+    }
+
+    // Method to show the "Game Over" dialog
+    public void showGameOverDialog() {
+        JLabel messageLabel = new JLabel("Game Over!");
+        messageLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        messageLabel.setForeground(Color.RED);
+        messageLabel.setHorizontalAlignment(JLabel.CENTER);
+        messageLabel.setOpaque(true); // Make the label opaque to show background color
+
+        // Create a custom dialog
+        JDialog dialog = new JDialog((Frame) null, "Game Over", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.add(messageLabel, BorderLayout.CENTER);
+
+        // Create a custom "OK" button
+        JButton okButton = new JButton("OK");
+        okButton.setFont(new Font("Arial", Font.BOLD, 16));
+        okButton.setFocusPainted(false);
+        okButton.addActionListener(e -> dialog.dispose());
+
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(Color.WHITE); // Set background color to white
+        buttonPanel.add(okButton);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.setSize(220, 100);
+        dialog.setLocationRelativeTo(null);
+        dialog.setUndecorated(true); // Remove the window decorations
+        dialog.getRootPane().setBorder(BorderFactory.createLineBorder(Color.RED, 2)); // Add a custom border
+        dialog.setVisible(true);
+    }
+
+    public void setButtonNumbers(JButton button, int mines) {
+        switch (mines) {
+            case 1:
+                button.setIcon(UI.getInstance().getOneIcon());
+                break;
+            case 2:
+                button.setIcon(UI.getInstance().getTwoIcon());
+                break;
+            case 3:
+                button.setIcon(UI.getInstance().getThreeIcon());
+                break;
+            case 4:
+                button.setIcon(UI.getInstance().getFourIcon());
+                break;
+            case 5:
+                button.setIcon(UI.getInstance().getFiveIcon());
+                break;
+            case 6:
+                button.setIcon(UI.getInstance().getSixIcon());
+                break;
+            case 7:
+                button.setIcon(UI.getInstance().getSevenIcon());
+                break;
+            case 8:
+                button.setIcon(UI.getInstance().getEightIcon());
+                break;
+            default:
+                break;
+        }
     }
 
     public void disableUndoButton() {
         buttonPanel.getComponent(0).setEnabled(false);
+        System.out.println("Undo button disabled");
     }
 
+    public void enableUndoButton() {
+        buttonPanel.getComponent(0).setEnabled(true);
+        System.out.println("Undo button enabled");
+    }
+    
     // Method to create and configure the grid panel
     private void createGridPanel(int rows, int cols) {
         gridPanel = new JPanel(new GridLayout(rows, cols));
@@ -113,14 +252,13 @@ public class UI extends JFrame {
         sixIcon = loadAndScaleIcon("/Image/six.png");
         sevenIcon = loadAndScaleIcon("/Image/seven.png");
         eightIcon = loadAndScaleIcon("/Image/eight.png");
-        flatIcon = loadAndScaleIcon("/Image/flat.png");
     }
 
     private ImageIcon loadAndScaleIcon(String path) {
         URL resource = getClass().getResource(path);
         if (resource == null) {
-        System.err.println("Error: Unable to load icon from path: " + path);
-        return null;
+            System.err.println("Error: Unable to load icon from path: " + path);
+            return null;
         }
         ImageIcon originalIcon = new ImageIcon(getClass().getResource(path));
         Image scaledImage = originalIcon.getImage().getScaledInstance(tileSize, tileSize, Image.SCALE_SMOOTH);
@@ -130,9 +268,18 @@ public class UI extends JFrame {
     // Method to add all the components to the frame
     private void addComponentsToFrame() {
         JPanel topPanel = new JPanel(new GridLayout(1, 3));
-        topPanel.add(minesLeftPanel);
+        JPanel minesLeftContainer = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        minesLeftContainer.setBackground(Color.BLACK);
+        minesLeftContainer.add(minesLeftPanel);
+
+        JPanel timerContainer = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        timerContainer.setBackground(Color.BLACK);
+        timerContainer.add(timerPanel);
+
+        topPanel.add(minesLeftContainer);
+        topPanel.add(timerContainer);
         topPanel.add(buttonPanel);
-        topPanel.add(timerPanel);
+        topPanel.setBackground(Color.BLACK);
 
         // Add the top panel and grid panel to the frame
         add(topPanel, BorderLayout.NORTH);
@@ -145,6 +292,8 @@ public class UI extends JFrame {
         setTitle("Minesweeper");
         setSize(tileSize * game.getCols(), tileSize * game.getRows());
         setLocationRelativeTo(null);
+        Point location = getLocation();
+        setLocation(location.x - 27, location.y - 30);
         pack();
         setVisible(true);
 
@@ -167,6 +316,22 @@ public class UI extends JFrame {
     public void updateTimer(int secondsPassed) {
         timerLabel.setText("Time: " + secondsPassed);
     }
+
+    public void resetUI() {
+        mineCounterLabel.setText("Mines Left: " + game.getBoard().getMineCount());
+        timerLabel.setText("Time: 0");
+
+        // Clear the grid panel
+        gridPanel.removeAll();
+        gridPanel.revalidate();
+        gridPanel.repaint();
+
+        game.initButtons(gridPanel);
+
+        // refresh the UI
+        revalidate();
+        repaint();
+    }    
 
     public JFrame getFrame() {
         return this;
@@ -214,9 +379,5 @@ public class UI extends JFrame {
 
     public ImageIcon getEightIcon() {
         return eightIcon;
-    }
-
-    public ImageIcon getFlatIcon() {
-        return flatIcon;
     }
 }

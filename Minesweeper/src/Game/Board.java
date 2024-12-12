@@ -21,8 +21,6 @@ public class Board {
             }
             cells.add(row);
         }
-        // placeMines();
-        // calculateNeighbouringMines();
     }
 
     // Method to place mines randomly on the board
@@ -68,6 +66,17 @@ public class Board {
                 }
 
             }
+        }
+    }
+
+    public void resetBoard() {
+        cells = new ArrayList<ArrayList<Cell>>();
+        for (int i = 0; i < rows; i++) {
+            ArrayList<Cell> row = new ArrayList<Cell>();
+            for (int j = 0; j < cols; j++) {
+                row.add(new Cell());
+            }
+            cells.add(row);
         }
     }
 
