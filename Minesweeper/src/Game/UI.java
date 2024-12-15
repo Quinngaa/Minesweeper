@@ -28,6 +28,9 @@ public class UI extends JFrame {
     private ImageIcon eightIcon;
     private int tileSize;
 
+    private UI() {
+    }
+
     public static UI getInstance() {
         if (instance == null) {
             instance = new UI();
@@ -195,28 +198,28 @@ public class UI extends JFrame {
     public void setButtonNumbers(JButton button, int mines) {
         switch (mines) {
             case 1:
-                button.setIcon(UI.getInstance().getOneIcon());
+                button.setIcon(oneIcon);
                 break;
             case 2:
-                button.setIcon(UI.getInstance().getTwoIcon());
+                button.setIcon(twoIcon);
                 break;
             case 3:
-                button.setIcon(UI.getInstance().getThreeIcon());
+                button.setIcon(threeIcon);
                 break;
             case 4:
-                button.setIcon(UI.getInstance().getFourIcon());
+                button.setIcon(fourIcon);
                 break;
             case 5:
-                button.setIcon(UI.getInstance().getFiveIcon());
+                button.setIcon(fiveIcon);
                 break;
             case 6:
-                button.setIcon(UI.getInstance().getSixIcon());
+                button.setIcon(sixIcon);
                 break;
             case 7:
-                button.setIcon(UI.getInstance().getSevenIcon());
+                button.setIcon(sevenIcon);
                 break;
             case 8:
-                button.setIcon(UI.getInstance().getEightIcon());
+                button.setIcon(eightIcon);
                 break;
             default:
                 break;
@@ -347,37 +350,5 @@ public class UI extends JFrame {
 
     public ImageIcon getEmptyCellIcon() {
         return emptyCellIcon;
-    }
-
-    public ImageIcon getOneIcon() {
-        return oneIcon;
-    }
-
-    public ImageIcon getTwoIcon() {
-        return twoIcon;
-    }
-
-    public ImageIcon getThreeIcon() {
-        return threeIcon;
-    }
-
-    public ImageIcon getFourIcon() {
-        return fourIcon;
-    }
-
-    public ImageIcon getFiveIcon() {
-        return fiveIcon;
-    }
-
-    public ImageIcon getSixIcon() {
-        return sixIcon;
-    }
-
-    public ImageIcon getSevenIcon() {
-        return sevenIcon;
-    }
-
-    public ImageIcon getEightIcon() {
-        return eightIcon;
     }
 }

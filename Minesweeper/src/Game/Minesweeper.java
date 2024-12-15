@@ -43,6 +43,7 @@ public class Minesweeper {
                 button.setPreferredSize(new Dimension(tileSize, tileSize));
                 button.setBackground(Color.LIGHT_GRAY);
                 button.setIcon(UI.getInstance().getEmptyCellIcon());
+                // button.setBorder(BorderFactory.createLineBorder(Color.RED));
 
                 final int currentRow = row;
                 final int currentCol = col;
@@ -67,6 +68,16 @@ public class Minesweeper {
                             StateManager.getInstance().doAction();
                             UI.getInstance().updateMineCounter(); // Update the mine counter whenever a flag is toggled
                         }
+                    }
+
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        button.setBorder(BorderFactory.createLineBorder(Color.RED));
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        button.setBorder(null);
                     }
                 });
                 buttonRow.add(button);
@@ -140,6 +151,7 @@ public class Minesweeper {
             gameEnded = true;
             timer.stop();
             UI.getInstance().disableUndoButton(); // no UNDO if game over
+            buttons.get(row).get(col).setBackground(Color.RED);
 
             for (int i = 0; i < board.getRows(); i++) {
                 for (int j = 0; j < board.getCols(); j++) {
@@ -162,10 +174,6 @@ public class Minesweeper {
         }
 
         cell.setRevealed(); // set current cell as revealed
-        buttons.get(row).get(col).setEnabled(false); // disable the button
-        
-
-        // cell.setRevealed(); // set current cell as revealed
 
         if (cell.getNeighbouringMines() == 0) {
             // If there are no neighboring mines, recursively reveal surrounding cells
@@ -174,6 +182,8 @@ public class Minesweeper {
 
         if (!gameEnded && checkWin()) {
             timer.stop();
+            StateManager.getInstance().doAction();
+            UI.getInstance().disableUndoButton();
             UI.getInstance().showGameWinDialog();
         }
     }
