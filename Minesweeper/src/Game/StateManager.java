@@ -6,11 +6,9 @@ import java.util.*;
 public class StateManager {
     private static StateManager instance;
     private Stack<ArrayList<Action>> states;
-    private boolean gameOver;
     
-    private StateManager() {
+    public StateManager() {
         states = new Stack<ArrayList<Action>>();
-        gameOver = false;
     }
 
     public static StateManager getInstance() {
@@ -41,9 +39,6 @@ public class StateManager {
     }
 
     public void doAction() {
-        if (gameOver) {
-            return;
-        }
         if (states.isEmpty()) {
             return;
         }

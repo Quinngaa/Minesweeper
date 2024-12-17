@@ -35,7 +35,7 @@ public class Minesweeper {
 
     // Method to initialize the buttons for each cell on the board
     public void initButtons(JPanel gridPanel) {
-        buttons.clear();
+        // buttons.clear();
         for (int row = 0; row < board.getRows(); row++) {
             ArrayList<JButton> buttonRow = new ArrayList<>();
             for (int col = 0; col < board.getCols(); col++) {
@@ -177,7 +177,7 @@ public class Minesweeper {
 
         if (cell.getNeighbouringMines() == 0) {
             // If there are no neighboring mines, recursively reveal surrounding cells
-            DFS(row, col);
+            miniDFS(row, col);
         }
 
         if (!gameEnded && checkWin()) {
@@ -188,7 +188,7 @@ public class Minesweeper {
         }
     }
 
-    private void DFS(int row, int col) {
+    private void miniDFS(int row, int col) {
         int[] directions = { -1, 0, 1 };
         for (int i : directions) {
             for (int j : directions) {
@@ -223,6 +223,7 @@ public class Minesweeper {
         firstClick = false;
         gameEnded = false;
 
+        buttons.clear();
         board.resetBoard();
         UI.getInstance().resetUI();
         StateManager.getInstance().clearStates();
